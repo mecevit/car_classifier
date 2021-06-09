@@ -1,7 +1,6 @@
 # Car Build Year Prediction
 
-### Components of the project:
-Here are the components (ml models and featuresets) of this Layer project in the order of execution.
+Here are the components (datasets, featuresets and ml models) of this Layer project in the order of execution.
 
 | Component  | Type | Description |
 | ------------- | ------------- | ------------- |
