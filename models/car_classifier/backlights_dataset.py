@@ -15,10 +15,10 @@ class BacklightsDataset(Dataset):
 
     def __getitem__(self, index):
         row = self.df.iloc[index]
-        img = Image.open(BytesIO(base64.b64decode(row.backlight_feature)))
-        y_label = torch.tensor(row.label)
-
+        img = Image.open(BytesIO(base64.b64decode(row.backlight_image)))
         if self.transform is not None:
             img = self.transform(img)
+
+        y_label = torch.tensor(row.label)
 
         return img, y_label

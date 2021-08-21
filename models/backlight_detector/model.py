@@ -34,7 +34,6 @@ def train_model(train: Train, ds: Dataset("labeledcars")) -> Any:
 
     # split the dataset in train and test set
     torch.manual_seed(1)
-    indices = torch.randperm(len(dataset)).tolist()
 
     # define training and validation data loaders
     data_loader = torch.utils.data.DataLoader(
@@ -55,16 +54,28 @@ def train_model(train: Train, ds: Dataset("labeledcars")) -> Any:
     model = get_instance_segmentation_model(num_classes)
     model.to(device)
 
+    lr = 0.005
+    momentum = 0.9
+    weight_decay = 0.0005
+    step_size = 3
+    gamma = 0.1
+    train.log_parameter("lr", lr)
+    train.log_parameter("momentum", momentum)
+    train.log_parameter("weight_decay", weight_decay)
+    train.log_parameter("step_size", step_size)
+    train.log_parameter("gamma", gamma)
+
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.005,
-                                momentum=0.9, weight_decay=0.0005)
+    optimizer = torch.optim.SGD(params, lr=lr,
+                                momentum=momentum, weight_decay=weight_decay)
 
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                   step_size=3,
-                                                   gamma=0.1)
-
+                                                   step_size=step_size,
+                                                   gamma=gamma)
     num_epochs = 4
+    train.log_parameter("num_epochs", num_epochs)
+
     for epoch in range(num_epochs):
         train_one_epoch(model, optimizer, data_loader, device, epoch,
                         print_freq=1)

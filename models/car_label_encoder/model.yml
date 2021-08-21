@@ -1,0 +1,10 @@
+apiVersion: 1
+
+name: "car_label_encoder"
+description: "Car build year encoder"
+
+training:
+  name: "car_label_encoder_training"
+  description: "Car build year encoder training"
+  entrypoint: model.py
+  environment: requirements.txt

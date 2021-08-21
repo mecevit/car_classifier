@@ -10,10 +10,18 @@ from .backlights_dataset import BacklightsDataset
 from .trainer import train_base_model
 
 
-def train_model(train: Train, ds: Featureset("car_parts_features")) -> Any:
-    device = ("cuda" if torch.cuda.is_available() else "cpu")
+def train_model(train: Train,
+                cpf: Featureset("car_parts_features"),
+                lc: Dataset("carimages")) -> Any:
+    carparts_df = cpf.to_pandas()
+    cars_df = lc.to_pandas()
 
-    df = ds.to_pandas()
+    device = ("cuda" if torch.cuda.is_available() else "cpu")
+    df = carparts_df.join(cars_df, lsuffix='_car', rsuffix='_carparts')
+    df = df[df['backlight_image'].notnull()]
+
+    train.log_parameter("Sample size", df.shape[0])
+
     le = preprocessing.LabelEncoder()
     df['label'] = le.fit_transform(df.year.values)
 
@@ -47,7 +55,7 @@ def train_model(train: Train, ds: Featureset("car_parts_features")) -> Any:
     test_loader = DataLoader(test_dataset, batch_size=1,
                              shuffle=False, num_workers=0)
 
-    n_classes = 2
+    n_classes = 14
     model = models.resnet34(pretrained=True)
     n_features = model.fc.in_features
     model.fc = nn.Linear(n_features, n_classes)
@@ -62,7 +70,7 @@ def train_model(train: Train, ds: Featureset("car_parts_features")) -> Any:
     dataset_sizes = {d: len(data_loaders[d]) for d in data_loaders}
 
     base_model, history = train_base_model(base_model, data_loaders,
-                                           dataset_sizes, device)
+                                           dataset_sizes, device, n_epochs=10)
 
     scripted_pytorch_model = torch.jit.script(base_model)
     return scripted_pytorch_model

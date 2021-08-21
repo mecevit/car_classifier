@@ -4,7 +4,10 @@ from collections import defaultdict
 import numpy as np
 import torch
 import torch.nn as nn
+from layer import Train
 
+def debug(msg):
+    print(msg, flush=True)
 
 def train_epoch(
         model,
@@ -70,8 +73,8 @@ def train_base_model(model, data_loaders, dataset_sizes, device, n_epochs=4):
 
     for epoch in range(n_epochs):
 
-        print(f'Epoch {epoch + 1}/{n_epochs}')
-        print('-' * 10)
+        debug(f'Epoch {epoch + 1}/{n_epochs}')
+        debug('-' * 10)
 
         train_acc, train_loss = train_epoch(
             model,
@@ -83,7 +86,7 @@ def train_base_model(model, data_loaders, dataset_sizes, device, n_epochs=4):
             dataset_sizes['train']
         )
 
-        print(f'Train loss {train_loss} accuracy {train_acc}')
+        debug(f'Train loss {train_loss} accuracy {train_acc}')
 
         val_acc, val_loss = eval_model(
             model,
@@ -93,8 +96,7 @@ def train_base_model(model, data_loaders, dataset_sizes, device, n_epochs=4):
             dataset_sizes['val']
         )
 
-        print(f'Val   loss {val_loss} accuracy {val_acc}')
-        print()
+        debug(f'Val   loss {val_loss} accuracy {val_acc}')
 
         history['train_acc'].append(train_acc)
         history['train_loss'].append(train_loss)
@@ -105,7 +107,7 @@ def train_base_model(model, data_loaders, dataset_sizes, device, n_epochs=4):
             torch.save(model.state_dict(), 'best_model_state.bin')
             best_accuracy = val_acc
 
-    print(f'Best val accuracy: {best_accuracy}')
+    debug(f'Best val accuracy: {best_accuracy}')
 
     model.load_state_dict(torch.load('best_model_state.bin'))
 

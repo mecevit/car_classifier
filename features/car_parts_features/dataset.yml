@@ -10,9 +10,7 @@ features:
     description: "Backlight of the car"
     source: backlight_feature/feature.py
     environment: backlight_feature/requirements.txt
-  - name: year
-    description: "Build year of the car"
-    source: build_year.sql
+    fabric: "f-spark-small"
 
 schema:
   primary_keys: ["id"]
