@@ -4,8 +4,8 @@ from sklearn import preprocessing
 
 
 
-def train_model(train: Train, lc: Dataset("carimages")) -> Any:
-    cars_df = lc.to_pandas()
+def train_model(train: Train, ci: Dataset("carimages")) -> Any:
+    cars_df = ci.to_pandas()
 
     le = preprocessing.LabelEncoder()
     le.fit(cars_df.year.values)

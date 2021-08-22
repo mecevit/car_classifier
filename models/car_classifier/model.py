@@ -1,20 +1,20 @@
 from typing import Any
-from layer import Featureset, Train, Dataset
+from layer import Featureset, Train, Dataset, Model
 import torchvision.models as models
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torch
-from sklearn import preprocessing
 from .backlights_dataset import BacklightsDataset
 from .trainer import train_base_model
 
 
 def train_model(train: Train,
                 cpf: Featureset("car_parts_features"),
-                lc: Dataset("carimages")) -> Any:
+                cle: Model("car_label_encoder"),
+                ci: Dataset("carimages")) -> Any:
     carparts_df = cpf.to_pandas()
-    cars_df = lc.to_pandas()
+    cars_df = ci.to_pandas()
 
     device = ("cuda" if torch.cuda.is_available() else "cpu")
     df = carparts_df.join(cars_df, lsuffix='_car', rsuffix='_carparts')
@@ -22,8 +22,7 @@ def train_model(train: Train,
 
     train.log_parameter("Sample size", df.shape[0])
 
-    le = preprocessing.LabelEncoder()
-    df['label'] = le.fit_transform(df.year.values)
+    df['label'] = cle.get_train().transform(df.year.values)
 
     # Channel wise mean and standard deviation for normalizing according to
     # ImageNet Statistics
@@ -55,7 +54,7 @@ def train_model(train: Train,
     test_loader = DataLoader(test_dataset, batch_size=1,
                              shuffle=False, num_workers=0)
 
-    n_classes = 14
+    n_classes = len(cle.get_train().classes_)
     model = models.resnet34(pretrained=True)
     n_features = model.fc.in_features
     model.fc = nn.Linear(n_features, n_classes)
@@ -69,8 +68,11 @@ def train_model(train: Train,
 
     dataset_sizes = {d: len(data_loaders[d]) for d in data_loaders}
 
-    base_model, history = train_base_model(base_model, data_loaders,
-                                           dataset_sizes, device, n_epochs=10)
+    base_model = train_base_model(train, base_model,
+                                  data_loaders,
+                                  dataset_sizes,
+                                  device
+                                  )
 
     scripted_pytorch_model = torch.jit.script(base_model)
     return scripted_pytorch_model

@@ -3,9 +3,6 @@ apiVersion: 1
 name: "labeledcars"
 type: source
 
-schema:
-  primary_keys: []
-
 materializations:
   - type: table
     target: layer

@@ -1,13 +1,15 @@
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from collections import defaultdict
+from layer import Train
 import numpy as np
 import torch
 import torch.nn as nn
-from layer import Train
+
 
 def debug(msg):
     print(msg, flush=True)
+
 
 def train_epoch(
         model,
@@ -63,9 +65,21 @@ def eval_model(model, data_loader, loss_fn, device, n_examples):
     return correct_predictions.double() / n_examples, np.mean(losses)
 
 
-def train_base_model(model, data_loaders, dataset_sizes, device, n_epochs=4):
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+def train_base_model(train: Train, model, data_loaders, dataset_sizes, device):
+    n_epochs = 10
+    lr = 0.001
+    momentum = 0.9
+    step_size = 7
+    gamma = 0.1
+
+    train.log_parameter("n_epochs", n_epochs)
+    train.log_parameter("lr", lr)
+    train.log_parameter("momentum", momentum)
+    train.log_parameter("step_size", step_size)
+    train.log_parameter("gamma", gamma)
+
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)
     loss_fn = nn.CrossEntropyLoss().to(device)
 
     history = defaultdict(list)
@@ -108,7 +122,8 @@ def train_base_model(model, data_loaders, dataset_sizes, device, n_epochs=4):
             best_accuracy = val_acc
 
     debug(f'Best val accuracy: {best_accuracy}')
+    train.log_parameter("accuracy", best_accuracy)
 
     model.load_state_dict(torch.load('best_model_state.bin'))
 
-    return model, history
+    return model
