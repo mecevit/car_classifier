@@ -11,6 +11,21 @@ Here are the components (datasets, featuresets and ml models) of this Layer proj
 | [car_classifier](https://github.com/mecevit/car_classifier/tree/main/models/car_classifier)  | Model | A Pytorch [model](https://github.com/mecevit/car_classifier/blob/main/models/car_classifier/model.py) with a custom [Backlights](https://github.com/mecevit/car_classifier/blob/main/models/car_classifier/backlights_dataset.py) dataset to classify the backlights to detect the build year of the related car. Dataset is populated with the `car_images` dataset` |
 | [car_label_encoder](https://github.com/mecevit/car_classifier/tree/main/models/car_label_encoder) | Model | A SKLearn [model](https://github.com/mecevit/car_classifier/blob/main/models/car_label_encoder/model.py) to encode the build year of cars. |
 
+## Installation & Running
+
+To check out the project, run:
+
+```bash
+layer clone https://github.com/mecevit/car_classifier
+cd car_classifier/
+```
+
+To run the project:
+
+```bash
+layer start
+```
+
 ## Sample Notebook
 
 You can use the following notebook to see how you can use the trained models and the features in a notebook environment
